@@ -14,32 +14,68 @@ type User struct {
 	Idade int `json:"idade"`
 	Altura int `json:"altura"`
 	Ativo bool `json:"ativo"`
-	DataDeCriacao string `json:"data_de_criacao"`
+	DataDeCriacao string `json:"dataDeCriacao"`
 }
 
+var AllUsers []User = []User{}
+var id int = 0
+
+func CreateProduct() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		token := c.GetHeader("token")
+
+		if token != "tokentest123" {
+			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
+			return
+		}
+
+		var req User
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+		}
+		if req.Altura == 0 { c.JSON(400, gin.H{ "error": "campo altura nao preenchido" })
+	return }
+		if req.Nome == "" { c.JSON(400, gin.H{ "error": "campo nome nao preenchido" }) 
+	return}
+		if req.Sobrenome == "" { c.JSON(400, gin.H{ "error": "campo sobrenome nao preenchido" })
+	return}
+		if req.Email == "" {c.JSON(400, gin.H{ "error": "campo email nao preenchido" })
+	return}
+		if req.Idade == 0 {c.JSON(400, gin.H{ "error": "campo idade nao preenchido" })
+	return}
+		if req.Ativo == false {c.JSON(400, gin.H{ "error": "campo ativo nao preenchido" })
+	return}
+		if req.DataDeCriacao == "" {c.JSON(400, gin.H{ "error": "campo dataDeCriacao nao preenchido" })
+	return}
+
+
+		id += 1
+		req.Id = id 
+		AllUsers = append(AllUsers, req)
+		c.JSON(200, req);
+		return
+	}
+}
 
 func GetAll(c *gin.Context) {
-	mockedUsers := []User{{Id: 1, Nome: "Rafael", Sobrenome: "Bonin", Email: "rafalyf11@gmail.com", Idade: 21, Altura: 179, Ativo: true, DataDeCriacao: "22/05/2023"}, {Id: 2, Nome: "leafar", Sobrenome: "ninob", Email: "fake@email.com", Idade: 30, Altura: 160, Ativo: true, DataDeCriacao: "11/01/2002"}}
-	var filtered  []User
-	for _, value := range mockedUsers {
-		if value.Nome == c.Query("nome") {
-		filtered = append(filtered, value)
-		}
-	}
 
-	c.JSON(200, gin.H{ "users": filtered })
+	c.JSON(200, gin.H{ "users": AllUsers })
 }
 
 func GetById(c *gin.Context) {
-	mockedUsers := []User{{Id: 1, Nome: "Rafael", Sobrenome: "Bonin", Email: "rafalyf11@gmail.com", Idade: 21, Altura: 179, Ativo: true, DataDeCriacao: "22/05/2023"}, {Id: 2, Nome: "leafar", Sobrenome: "ninob", Email: "fake@email.com", Idade: 30, Altura: 160, Ativo: true, DataDeCriacao: "11/01/2002"}}
 
 	var user User
 
-	for _, value := range mockedUsers {
+	for _, value := range AllUsers {
 		if fmt.Sprint(value.Id) == c.Param("id") {
 			user = value
 			}
 	}
-
-	c.JSON(200, gin.H{ "User": user })
+	if user.Id == 0 {
+		c.JSON(404, gin.H{"error": "no user was found"})
+	} else {
+		c.JSON(200, gin.H{ "User": user })
+	}
+	
 }

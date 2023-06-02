@@ -11,12 +11,16 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("ola-eu", func(c *gin.Context) {
+	usersRouter := router.Group("/users")
+
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Ola Rafael",})
 	})
-	router.GET("users", d1ginjson.GetAll)
+	usersRouter.GET("/", d1ginjson.GetAll)
 
-	router.GET("users/:id", d1ginjson.GetById)
+	usersRouter.GET("/:id", d1ginjson.GetById)
+
+	usersRouter.POST("/create", d1ginjson.CreateProduct())
 
 	router.Run()
 }
