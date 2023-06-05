@@ -22,11 +22,16 @@ func main() {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Ola Rafael",})
 	})
+
 	usersRouter.GET("/", userHandler.GetAll())
 
-	// usersRouter.GET("/:id", d1ginjson.GetById)
-
 	usersRouter.POST("/create", userHandler.Create())
+
+	usersRouter.PUT("/update/:id", userHandler.Update())
+
+	usersRouter.DELETE("/delete/:id", userHandler.Delete())
+
+	usersRouter.PATCH("/softupdate/:id", userHandler.SoftUpdate())
 
 	router.Run()
 }
