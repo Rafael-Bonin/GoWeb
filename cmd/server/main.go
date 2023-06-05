@@ -3,11 +3,14 @@ package main
 import (
 	"github.com/Rafael-Bonin/GoWeb/cmd/server/handler"
 	"github.com/Rafael-Bonin/GoWeb/internal/users"
+	"github.com/Rafael-Bonin/GoWeb/pkg/store"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func usersRouteFactory() *handler.User {
-	userRepository := users.NewRepository()
+	db := store.New(store.FileType, "./users.json")
+	userRepository := users.NewRepository(db)
 	userService := users.NewService(userRepository)
 	userController := handler.NewUserHandler(userService)
 
@@ -15,6 +18,7 @@ func usersRouteFactory() *handler.User {
 }
 
 func main() {
+	godotenv.Load()
 	userHandler := usersRouteFactory()
 	router := gin.Default()
 	usersRouter := router.Group("/users")

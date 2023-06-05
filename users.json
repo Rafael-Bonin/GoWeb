@@ -1,0 +1,22 @@
+[
+ {
+  "id": 1,
+  "nome": "Felipe",
+  "sobrenome": "Bonin",
+  "email": "fehhmlo@gmail.com",
+  "idade": 21,
+  "altura": 179,
+  "ativo": true,
+  "dataDeCriacao": "11/01/2002"
+ },
+ {
+  "id": 2,
+  "nome": "Felipe",
+  "sobrenome": "bonin",
+  "email": "fehhmlo@gmail.com",
+  "idade": 21,
+  "altura": 179,
+  "ativo": true,
+  "dataDeCriacao": "11/01/2002"
+ }
+]

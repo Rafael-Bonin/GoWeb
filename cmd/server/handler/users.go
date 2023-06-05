@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/Rafael-Bonin/GoWeb/internal/users"
@@ -25,8 +26,8 @@ type User struct {
 func (u *User) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
-
-		if token != "tokentest123" {
+		envToken := os.Getenv("TOKEN")
+		if token != envToken {
 			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
 			return
 		}
@@ -46,8 +47,8 @@ func (u *User) GetAll() gin.HandlerFunc {
 func (u *User) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
-
-		if token != "tokentest123" {
+		envToken := os.Getenv("TOKEN")
+		if token != envToken {
 			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
 			return
 		}
@@ -60,7 +61,7 @@ func (u *User) Create() gin.HandlerFunc {
 
 	result, err := u.service.Create(req.Nome, req.Sobrenome, req.Email, req.Idade, req.Altura, req.Ativo, req.DataDeCriacao)
 	if err != nil {
-		c.JSON(400, gin.H{ "error": "erro inesperado" })
+		c.JSON(400, gin.H{ "error": err.Error() })
 		return
 	}
 
@@ -72,8 +73,8 @@ func (u *User) Create() gin.HandlerFunc {
 func (u *User) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
 			token := c.GetHeader("token")
-	
-			if token != "tokentest123" {
+			envToken := os.Getenv("TOKEN")
+			if token != envToken {
 				c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
 				return
 			}
@@ -102,8 +103,8 @@ func (u *User) Update() gin.HandlerFunc {
 func (u *User) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
-	
-		if token != "tokentest123" {
+		envToken := os.Getenv("TOKEN")
+		if token != envToken {
 			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
 			return
 		}
@@ -126,8 +127,8 @@ func (u *User) Delete() gin.HandlerFunc {
 func (u *User) SoftUpdate() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
-
-		if token != "tokentest123" {
+		envToken := os.Getenv("TOKEN")
+		if token != envToken {
 			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
 			return
 		}

@@ -1,6 +1,10 @@
 package users
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/Rafael-Bonin/GoWeb/pkg/store"
+)
 
 type User struct {
 	Id int `json:"id"`
@@ -21,19 +25,28 @@ type Repository interface {
 	SoftUpdate(sobrenome string, idade, id int) (User, error)
 }
 
-type repository struct {}
-
-var AllUsers []User = []User{}
-var id int = 0
+type repository struct {
+	db store.Store
+}
 
 func (r *repository) GetAll() ([]User, error) {
-	return AllUsers, nil
+	var allUsers []User
+	r.db.Read(&allUsers)
+	return allUsers, nil
 }
 
 func (r *repository) Create(nome, sobrenome, email string, idade, altura int, ativo bool, dataDeCriacao string) (User, error) {
-	id++
-	newUser := User{Id: id, Nome: nome, Sobrenome: sobrenome, Email: email, Idade: idade, Altura: altura, Ativo: ativo, DataDeCriacao: dataDeCriacao}
-	AllUsers = append(AllUsers, newUser)
+	var allUsers []User
+	r.db.Read(&allUsers)
+	lastId, err := r.lastId()
+	if err != nil {
+		return User{}, err
+	}
+	newUser := User{Id: lastId, Nome: nome, Sobrenome: sobrenome, Email: email, Idade: idade, Altura: altura, Ativo: ativo, DataDeCriacao: dataDeCriacao}
+	allUsers = append(allUsers, newUser)
+	if er := r.db.Write(allUsers); er != nil {
+		return User{}, er
+	}
 
 	return newUser, nil
 }
@@ -41,12 +54,14 @@ func (r *repository) Create(nome, sobrenome, email string, idade, altura int, at
 func (r *repository) Update(u User) (User, error) {
 	var found bool = false
 	var updatedUser User
+	var allUsers []User
+	r.db.Read(&allUsers)
 
-	for i, value := range AllUsers {
+	for i, value := range allUsers {
 		if value.Id == u.Id {
-			AllUsers[i] = User{Id: u.Id, Nome: u.Nome, Sobrenome: u.Sobrenome, Email: u.Email, Idade: u.Idade, Altura: u.Altura, Ativo: u.Ativo, DataDeCriacao: u.DataDeCriacao}
+			allUsers[i] = User{Id: u.Id, Nome: u.Nome, Sobrenome: u.Sobrenome, Email: u.Email, Idade: u.Idade, Altura: u.Altura, Ativo: u.Ativo, DataDeCriacao: u.DataDeCriacao}
 			found = true
-			updatedUser = AllUsers[i]
+			updatedUser = allUsers[i]
 			break
 		}
 	}
@@ -55,14 +70,20 @@ func (r *repository) Update(u User) (User, error) {
 		return User{}, errors.New("Nao foram encontrados usuarios com esse id")
 	}
 
+	if err := r.db.Write(allUsers); err != nil {
+		return User{}, err
+	}
+
 	return updatedUser, nil
 }
 
 func (r *repository) Delete(id int) error {
 	deleted := false
 	var index int
+	var allUsers []User
+	r.db.Read(&allUsers)
 
-	for i, value := range AllUsers {
+	for i, value := range allUsers {
 		if value.Id == id {
 			index = i
 			deleted = true
@@ -74,20 +95,27 @@ func (r *repository) Delete(id int) error {
 		return errors.New("nao foi encontrado um usuario com este id")
 	}
 
-	AllUsers = append(AllUsers[:index], AllUsers[index + 1:]...)
+	allUsers = append(allUsers[:index], allUsers[index + 1:]...)
+	
+	if err := r.db.Write(allUsers); err != nil {
+		return err
+	}
+
 	return nil
 } 
 
 func (r *repository) SoftUpdate(sobrenome string, idade, id int) (User, error) {
 	var found bool = false
 	var updatedUser User
+	var allUsers []User
+	r.db.Read(&allUsers)
 
-	for i, value := range AllUsers {
+	for i, value := range allUsers {
 		if value.Id == id {
-			AllUsers[i].Sobrenome = sobrenome
-			AllUsers[i].Idade = idade
+			allUsers[i].Sobrenome = sobrenome
+			allUsers[i].Idade = idade
 			found = true
-			updatedUser = AllUsers[i]
+			updatedUser = allUsers[i]
 			break
 		}
 	}
@@ -96,9 +124,26 @@ func (r *repository) SoftUpdate(sobrenome string, idade, id int) (User, error) {
 		return User{}, errors.New("Nao foram encontrados usuarios com esse id")
 	}
 
+	if err := r.db.Write(allUsers); err != nil {
+		return User{}, err
+	}
+
 	return updatedUser, nil
 }
 
-func NewRepository() Repository {
-	return &repository{}
+func NewRepository(db store.Store) Repository {
+	return &repository{
+		db: db,
+	}
+}
+
+func (r *repository) lastId() (int, error) {
+	var allUsers []User
+	if err := r.db.Read(&allUsers); err != nil {
+		return 1, nil
+	}
+	if len(allUsers) < 1 {
+		return 1, nil
+	}
+	return allUsers[len(allUsers) - 1].Id + 1, nil
 }
