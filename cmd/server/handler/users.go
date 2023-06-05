@@ -1,13 +1,11 @@
-package d1ginjson
+package handler
 
 import (
-	"fmt"
-
+	"github.com/Rafael-Bonin/GoWeb/internal/users"
 	"github.com/gin-gonic/gin"
 )
 
-type User struct {
-	Id int `json:"id"`
+type request struct {
 	Nome string `json:"nome"`
 	Sobrenome string `json:"sobrenome"`
 	Email string `json:"email"`
@@ -17,12 +15,12 @@ type User struct {
 	DataDeCriacao string `json:"dataDeCriacao"`
 }
 
-var AllUsers []User = []User{}
-var id int = 0
+type User struct {
+	service users.Service
+}
 
-func CreateProduct() gin.HandlerFunc {
+func (u *User) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		token := c.GetHeader("token")
 
 		if token != "tokentest123" {
@@ -30,7 +28,28 @@ func CreateProduct() gin.HandlerFunc {
 			return
 		}
 
-		var req User
+		result, err := u.service.GetAll()
+
+		if err != nil {
+			c.JSON(400, gin.H{ "error": "erro inesperado" })
+			return
+		}
+
+		c.JSON(200, result)
+		return
+	}
+}
+
+func (u *User) Create() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("token")
+
+		if token != "tokentest123" {
+			c.JSON(401, gin.H{ "error": "usuario nao autorizado" })
+			return
+		}
+
+		var req request
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 		}
@@ -49,33 +68,22 @@ func CreateProduct() gin.HandlerFunc {
 		if req.DataDeCriacao == "" {c.JSON(400, gin.H{ "error": "campo dataDeCriacao nao preenchido" })
 	return}
 
+	result, err := u.service.Create(req.Nome, req.Sobrenome, req.Email, req.Idade, req.Altura, req.Ativo, req.DataDeCriacao)
+	if err != nil {
+		c.JSON(400, gin.H{ "error": "erro inesperado" })
+	}
 
-		id += 1
-		req.Id = id 
-		AllUsers = append(AllUsers, req)
-		c.JSON(200, req);
-		return
+	c.JSON(200, result)
+
 	}
 }
 
-func GetAll(c *gin.Context) {
+func (u *User) Update() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
 
-	c.JSON(200, gin.H{ "users": AllUsers })
+	}
 }
 
-func GetById(c *gin.Context) {
-
-	var user User
-
-	for _, value := range AllUsers {
-		if fmt.Sprint(value.Id) == c.Param("id") {
-			user = value
-			}
-	}
-	if user.Id == 0 {
-		c.JSON(404, gin.H{"error": "no user was found"})
-	} else {
-		c.JSON(200, gin.H{ "User": user })
-	}
-	
+func NewUserHandler(s users.Service) *User {
+	return &User{ service: s }
 }
