@@ -1,4 +1,14 @@
 definitions:
+  handler.SoftUpdateRequestDTO:
+    properties:
+      idade:
+        type: integer
+      sobrenome:
+        type: string
+    required:
+    - idade
+    - sobrenome
+    type: object
   handler.request:
     properties:
       altura:
@@ -65,6 +75,31 @@ paths:
       summary: List users
       tags:
       - users
+  /users/:id:
+    delete:
+      consumes:
+      - application/json
+      description: delete users
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete users
+      tags:
+      - Users
+  /users/create:
     post:
       consumes:
       - application/json
@@ -89,6 +124,70 @@ paths:
           schema:
             $ref: '#/definitions/web.Response'
       summary: Create users
+      tags:
+      - Users
+  /users/softupdate/:id:
+    patch:
+      consumes:
+      - application/json
+      description: updates users sobrenome and idade fields
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: sobrenome to update
+        in: body
+        name: softUpdateDTO
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SoftUpdateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: SoftUpdate users
+      tags:
+      - Users
+  /users/update/:id:
+    put:
+      consumes:
+      - application/json
+      description: update users
+      parameters:
+      - description: token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handler.request'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/web.Response'
+      summary: Update users
       tags:
       - Users
 swagger: "2.0"

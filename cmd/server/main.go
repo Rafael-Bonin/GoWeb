@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Rafael-Bonin/GoWeb/cmd/server/handler"
+	"github.com/Rafael-Bonin/GoWeb/cmd/server/middlewares"
 	"github.com/Rafael-Bonin/GoWeb/internal/users"
 	"github.com/Rafael-Bonin/GoWeb/pkg/store"
 	"github.com/gin-gonic/gin"
@@ -37,11 +38,11 @@ func main() {
 
 	docs.SwaggerInfo.Host = os.Getenv("HOST")
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	usersRouter.GET("/", userHandler.GetAll())
-	usersRouter.POST("/create", userHandler.Create())
-	usersRouter.PUT("/update/:id", userHandler.Update())
-	usersRouter.DELETE("/delete/:id", userHandler.Delete())
-	usersRouter.PATCH("/softupdate/:id", userHandler.SoftUpdate())
+	usersRouter.Use(middlewares.AuthMiddleware()).GET("/", userHandler.GetAll())
+	usersRouter.Use(middlewares.AuthMiddleware()).POST("/create", userHandler.Create())
+	usersRouter.Use(middlewares.AuthMiddleware()).PUT("/update/:id", userHandler.Update())
+	usersRouter.Use(middlewares.AuthMiddleware()).DELETE("/delete/:id", userHandler.Delete())
+	usersRouter.Use(middlewares.AuthMiddleware()).PATCH("/softupdate/:id", userHandler.SoftUpdate())
 
 	router.Run()
 }

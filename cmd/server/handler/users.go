@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/Rafael-Bonin/GoWeb/internal/users"
@@ -35,13 +34,6 @@ type User struct {
 // @Router /users [get]
 func (u *User) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		envToken := os.Getenv("TOKEN")
-		if token != envToken {
-			c.JSON(401, web.NewResponse(401, nil, "usuario nao autorizado"))
-			return
-		}
-
 		result, err := u.service.GetAll()
 
 		if err != nil {
@@ -63,16 +55,9 @@ func (u *User) GetAll() gin.HandlerFunc {
 // @Param token header string true "token"
 // @Param user body request true "user to create"
 // @Success 200 {object} web.Response
-// @Router /users [post]
+// @Router /users/create [post]
 func (u *User) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		envToken := os.Getenv("TOKEN")
-		if token != envToken {
-			c.JSON(401, web.NewResponse(401, nil, "usuario nao autorizado"))
-			return
-		}
-
 		var req request
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(400, web.NewResponse(400, nil, err.Error()))
@@ -90,15 +75,18 @@ func (u *User) Create() gin.HandlerFunc {
 	}
 }
 
+// @Summary Update users
+// @Tags Users
+// @Description update users
+// @Accept json
+// @Produce json
+// @Param token header string true "token"
+// @Param        id   path      int  true  "User ID"
+// @Param user body request true "User to update"
+// @Success 200 {object} web.Response
+// @Router /users/update/:id [put]
 func (u *User) Update() gin.HandlerFunc {
 	return func(c *gin.Context) {
-			token := c.GetHeader("token")
-			envToken := os.Getenv("TOKEN")
-			if token != envToken {
-				c.JSON(401, web.NewResponse(401, nil, "usuario nao autorizado"))
-				return
-			}
-	
 			userId, e := strconv.Atoi(c.Param("id"))
 
 			var req request
@@ -120,14 +108,17 @@ func (u *User) Update() gin.HandlerFunc {
 	
 }
 
+// @Summary Delete users
+// @Tags Users
+// @Description delete users
+// @Accept json
+// @Produce json
+// @Param token header string true "token"
+// @Param        id   path      int  true  "User ID"
+// @Success 204
+// @Router /users/:id [delete]
 func (u *User) Delete() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		envToken := os.Getenv("TOKEN")
-		if token != envToken {
-			c.JSON(401, web.NewResponse(401, nil, "usuario nao autorizado"))
-			return
-		}
 		userId, e := strconv.Atoi(c.Param("id"))
 
 		if e != nil {
@@ -144,15 +135,18 @@ func (u *User) Delete() gin.HandlerFunc {
 	}
 }
 
+// @Summary SoftUpdate users
+// @Tags Users
+// @Description updates users sobrenome and idade fields
+// @Accept json
+// @Produce json
+// @Param token header string true "token"
+// @Param id path int true "User ID"
+// @Param softUpdateDTO body SoftUpdateRequestDTO true "sobrenome to update"
+// @Success 200 {object} web.Response
+// @Router /users/softupdate/:id [patch]
 func (u *User) SoftUpdate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		envToken := os.Getenv("TOKEN")
-		if token != envToken {
-			c.JSON(401, web.NewResponse(401, nil, "usuario nao autorizado"))
-			return
-		}
-
 		userId, e := strconv.Atoi(c.Param("id"))
 
 		var req SoftUpdateRequestDTO
