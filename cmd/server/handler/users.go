@@ -24,6 +24,15 @@ type User struct {
 	service users.Service
 }
 
+// GetAllUsers godoc
+// @Summary List users
+// @Tags users
+// @Description get users
+// @Accept  json
+// @Produce  json
+// @Param token header string true "token"
+// @Success 200 {object} web.Response
+// @Router /users [get]
 func (u *User) GetAll() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
@@ -45,6 +54,16 @@ func (u *User) GetAll() gin.HandlerFunc {
 	}
 }
 
+// createUsers godoc
+// @Summary Create users
+// @Tags Users
+// @Description Create users
+// @Accept  json
+// @Produce  json
+// @Param token header string true "token"
+// @Param user body request true "user to create"
+// @Success 200 {object} web.Response
+// @Router /users [post]
 func (u *User) Create() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
